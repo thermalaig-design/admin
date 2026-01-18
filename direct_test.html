@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Direct Test</title>
+</head>
+<body>
+    <div id="app">
+        <h1>Direct Supabase Table Test</h1>
+        <div id="result">Initializing...</div>
+        <button onclick="testConnection()">Test Again</button>
+    </div>
+
+    <script>
+        // Direct fetch approach - no external libraries
+        const SUPABASE_URL = 'https://zcbjiozbymrymrhovlgm.supabase.co';
+        const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjYmppb3pieW1yeW1yaG92bGdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNTI5MjksImV4cCI6MjA4MzcyODkyOX0.4GhckSCPsqol2fTlSZM9DQy3CY5ARii0mhD8taQvB-8';
+        
+        const resultDiv = document.getElementById('result');
+
+        async function testConnection() {
+            resultDiv.innerHTML = '<p>Testing connection...</p>';
+            
+            try {
+                // Test basic connectivity first
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                    headers: {
+                        'apikey': ANON_KEY,
+                        'Authorization': `Bearer ${ANON_KEY}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                resultDiv.innerHTML += '<p style="color: green;">✅ Supabase connection OK</p>';
+                
+                // Now test the specific table
+                resultDiv.innerHTML += '<p>Testing marquee_updates table...</p>';
+                
+                const tableResponse = await fetch(
+                    `${SUPABASE_URL}/rest/v1/marquee_updates?select=*&limit=5`,
+                    {
+                        headers: {
+                            'apikey': ANON_KEY,
+                            'Authorization': `Bearer ${ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                
+                const tableData = await tableResponse.json();
+                
+                if (tableResponse.ok) {
+                    resultDiv.innerHTML += `
+                        <h2 style="color: green;">✅ SUCCESS!</h2>
+                        <p><strong>Table accessible</strong></p>
+                        <p><strong>Records found:</strong> ${Array.isArray(tableData) ? tableData.length : 0}</p>
+                        ${Array.isArray(tableData) && tableData.length > 0 ? 
+                            `<pre>${JSON.stringify(tableData.slice(0, 3), null, 2)}</pre>` : 
+                            '<p>No data in table</p>'
+                        }
+                    `;
+                } else {
+                    resultDiv.innerHTML += `
+                        <h2 style="color: red;">❌ Table Access Failed</h2>
+                        <p><strong>Error:</strong> ${tableData.message || 'Unknown error'}</p>
+                        <p><strong>Code:</strong> ${tableData.code || tableResponse.status}</p>
+                    `;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML += `
+                    <h2 style="color: red;">❌ Connection Error</h2>
+                    <p><strong>Message:</strong> ${error.message}</p>
+                `;
+            }
+        }
+
+        // Auto-run on page load
+        window.addEventListener('DOMContentLoaded', testConnection);
+    </script>
+</body>
+</html>

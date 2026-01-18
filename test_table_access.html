@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Table Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>Testing marquee_updates table access</h1>
+        <div id="result">Testing...</div>
+    </div>
+
+    <script>
+        // Same credentials as your app
+        const supabaseUrl = 'https://zcbjiozbymrymrhovlgm.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjYmppb3pieW1yeW1yaG92bGdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNTI5MjksImV4cCI6MjA4MzcyODkyOX0.4GhckSCPsqol2fTlSZM9DQy3CY5ARii0mhD8taQvB-8';
+        
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const resultDiv = document.getElementById('result');
+
+        async function testTableAccess() {
+            try {
+                resultDiv.innerHTML = '<p>Testing table access...</p>';
+                
+                // Test 1: Basic select
+                const { data: testData, error: testError } = await supabase
+                    .from('marquee_updates')
+                    .select('*')
+                    .limit(5);
+                
+                if (testError) {
+                    resultDiv.innerHTML = `
+                        <h2 style="color: red;">❌ Error accessing table:</h2>
+                        <p><strong>Message:</strong> ${testError.message}</p>
+                        <p><strong>Code:</strong> ${testError.code}</p>
+                        <p><strong>Hint:</strong> ${testError.hint || 'None'}</p>
+                    `;
+                    return;
+                }
+                
+                resultDiv.innerHTML = `
+                    <h2 style="color: green;">✅ Success! Table is accessible</h2>
+                    <p><strong>Records found:</strong> ${testData?.length || 0}</p>
+                    <p><strong>Status:</strong> Table exists and responds correctly</p>
+                    ${testData?.length > 0 ? 
+                        `<h3>Sample data:</h3>
+                         <pre>${JSON.stringify(testData.slice(0, 3), null, 2)}</pre>` : 
+                        '<p>No data in table yet</p>'
+                    }
+                `;
+                
+            } catch (err) {
+                resultDiv.innerHTML = `
+                    <h2 style="color: red;">❌ Connection Error:</h2>
+                    <p>${err.message}</p>
+                `;
+            }
+        }
+
+        // Run test when page loads
+        testTableAccess();
+    </script>
+</body>
+</html>
