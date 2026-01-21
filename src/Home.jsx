@@ -3,7 +3,7 @@ import { Database, Calendar, HeartPulse, Stethoscope, Activity, Users, Building2
 import NotificationsSection from './admin/components/NotificationsSection';
 import { getAllAppointmentsAdmin, getAllReferralsAdmin } from './admin/services/adminApi';
 import { getAllNotifications } from './services/notificationsApi';
-import SponsorSection from './components/SponsorSection';
+import PublicSponsorDisplay from './components/PublicSponsorDisplay';
 
 const Home = ({ onNavigate, onLogout }) => {
   const [statsData, setStatsData] = useState({
@@ -183,7 +183,7 @@ const Home = ({ onNavigate, onLogout }) => {
 
         {/* Sponsor Section */}
         <div className="mt-8 lg:mt-12">
-          <SponsorSection />
+          <PublicSponsorDisplay />
         </div>
       </main>
     </div>

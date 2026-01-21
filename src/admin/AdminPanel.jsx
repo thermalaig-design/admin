@@ -13,6 +13,7 @@ import HospitalsPage from './pages/HospitalsPage';
 import DoctorsPage from './pages/DoctorsPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import ReferralsPage from './pages/ReferralsPage';
+import SponsorsPage from './pages/SponsorsPage';
 
 const TopNavBar = ({ onNavigate, onLogout }) => (
   <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
@@ -51,6 +52,7 @@ const NavigationMenu = ({ currentView, handleNavigate }) => (
         { id: 'hospitals', label: 'Hospitals', icon: Building2 },
         { id: 'doctors', label: 'Doctors', icon: Stethoscope },
         { id: 'referrals', label: 'Patient Referrals', icon: HeartPulse },
+        { id: 'sponsors', label: 'Sponsors', icon: UserPlus },
         { id: 'appointments', label: 'Appointments', icon: CalendarCheck },
       ].map((item) => {
         const Icon = item.icon;
@@ -101,6 +103,8 @@ const AdminPanel = ({ onNavigate, onLogout, initialView = 'main' }) => {
           return <AppointmentsPage onNavigate={handleNavigate} />;
         case 'referrals':
           return <ReferralsPage onNavigate={handleNavigate} />;
+        case 'sponsors':
+          return <SponsorsPage />;
         default:
         return (
           <div className="flex-1 pb-10">

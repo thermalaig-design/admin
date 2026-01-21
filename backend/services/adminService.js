@@ -955,7 +955,17 @@ export const getAllSponsors = async (onlyActive = false) => {
       .order('priority', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    // Ensure positions field is properly handled as an array
+    if (data) {
+      return data.map(sponsor => ({
+        ...sponsor,
+        positions: Array.isArray(sponsor.positions) ? sponsor.positions : 
+                 typeof sponsor.positions === 'string' ? sponsor.positions.split(',').map(p => p.trim()).filter(p => p) : []
+      }));
+    }
+    
+    return [];
   } catch (error) {
     console.error('Error fetching all sponsors:', error);
     throw error;
@@ -971,6 +981,16 @@ export const getSponsorById = async (id) => {
       .single();
 
     if (error) throw error;
+    
+    // Ensure positions field is properly handled as an array
+    if (data) {
+      return {
+        ...data,
+        positions: Array.isArray(data.positions) ? data.positions : 
+                 typeof data.positions === 'string' ? data.positions.split(',').map(p => p.trim()).filter(p => p) : []
+      };
+    }
+    
     return data;
   } catch (error) {
     console.error('Error fetching sponsor by ID:', error);
@@ -980,22 +1000,19 @@ export const getSponsorById = async (id) => {
 
 export const createSponsor = async (sponsorData) => {
   try {
-    // Check if a sponsor already exists (since only one sponsor is allowed)
-    const { data: existingSponsors, error: existingError } = await supabase
-      .from('sponsors')
-      .select('id');
-
-    if (existingError) throw existingError;
-    
-    // If a sponsor already exists, we shouldn't create another
-    if (existingSponsors && existingSponsors.length > 0) {
-      throw new Error('A sponsor already exists. Only one sponsor is allowed.');
+    // Handle positions array conversion for Supabase
+    const processedSponsorData = { ...sponsorData };
+    if (Array.isArray(sponsorData.positions)) {
+      processedSponsorData.positions = sponsorData.positions;
+    } else if (typeof sponsorData.positions === 'string') {
+      // Convert string to array if needed
+      processedSponsorData.positions = sponsorData.positions.split(',').map(p => p.trim()).filter(p => p);
     }
     
     const { data, error } = await supabase
       .from('sponsors')
       .insert([{
-        ...sponsorData,
+        ...processedSponsorData,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         created_by: sponsorData.created_by || 'system'
@@ -1013,10 +1030,19 @@ export const createSponsor = async (sponsorData) => {
 
 export const updateSponsor = async (id, sponsorData) => {
   try {
+    // Handle positions array conversion for Supabase
+    const processedSponsorData = { ...sponsorData };
+    if (Array.isArray(sponsorData.positions)) {
+      processedSponsorData.positions = sponsorData.positions;
+    } else if (typeof sponsorData.positions === 'string') {
+      // Convert string to array if needed
+      processedSponsorData.positions = sponsorData.positions.split(',').map(p => p.trim()).filter(p => p);
+    }
+    
     const { data, error } = await supabase
       .from('sponsors')
       .update({
-        ...sponsorData,
+        ...processedSponsorData,
         updated_at: new Date().toISOString(),
         updated_by: sponsorData.updated_by || 'system'
       })
